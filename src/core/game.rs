@@ -11,6 +11,7 @@ pub struct Game {
 }
 
 impl Game {
+    #[allow(dead_code)]
     pub fn new(board: Option<Board>) -> Self {
         Game {
             board: {

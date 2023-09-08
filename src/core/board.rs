@@ -10,6 +10,7 @@ pub struct Board {
 }
 
 impl Board {
+    #[allow(dead_code)]
     pub fn new(num_rows: usize, num_columns: usize) -> Self {
         let mut board = Board {
             data: Vec::new(),
