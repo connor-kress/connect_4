@@ -4,6 +4,9 @@ use super::Color;
 pub struct Game {
     board: Board,
     current_color: Color,
+    amount_to_win: usize,
+    started: bool,
+    ended: bool,
     // players: Vec<u8>,
 }
 
@@ -17,10 +20,20 @@ impl Game {
                 }
             },
             current_color: Color::Red,
+            amount_to_win: 4,
+            started: false,
+            ended: false,
         }
     }
 
-    pub fn take_turn(&mut self) {
+    fn switch_turn(&mut self) {
+        self.current_color = match self.current_color {
+            Color::Red => Color::Black,
+            Color::Black => Color::Red,
+        }
+    }
+
+    fn take_turn(&mut self) {
         loop {
             let col_index;
             loop {
@@ -40,6 +53,47 @@ impl Game {
                 Err(_) => continue,
             }
         }
-        println!("{:?}", self.board);
+    }
+
+    fn handle_win(&mut self, color: Color) {
+        self.ended = true;
+        println!("{:?} wins!", color);
+    }
+
+    fn handle_tie(&mut self) {
+        self.ended = true;
+        println!("Tie");
+    }
+
+    pub fn resume(&mut self) -> Result<(), ()> {
+        if self.ended | !self.started {
+            return Err(());
+        }
+        loop {
+            println!("{:?}", self.board);
+            self.take_turn();
+            match self.board.get_winning_color(self.amount_to_win) {
+                Some(color) => {
+                    self.handle_win(color);
+                    break;
+                },
+                None => {},
+            }
+            if self.board.is_full() {
+                self.handle_tie();
+                break;
+            }
+            self.switch_turn();
+        }
+        Ok(())
+    }
+
+    pub fn start(&mut self) -> Result<(), ()> {
+        if self.started | self.ended {
+            return Err(());
+        }
+        self.started = true;
+        self.resume()
+
     }
 }

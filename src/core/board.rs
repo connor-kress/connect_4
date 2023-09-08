@@ -2,7 +2,6 @@ use crate::core::Color;
 
 type Line = Vec<Option<Color>>;
 
-#[allow(dead_code)]
 #[derive(Debug, PartialEq)]
 pub struct Board {
     data: Vec<Line>,
@@ -58,7 +57,6 @@ impl Board {
         }
     }
 
-    #[allow(dead_code)]
     fn get_column(&self, col_index: usize) -> Line {
         let mut column = Vec::new();
         for row_index in 0..self.num_rows {
@@ -91,18 +89,16 @@ impl Board {
         diagonal
     }
 
-    #[allow(dead_code)]
     pub fn is_full(&self) -> bool {
         for item in self.data[0].iter() {
             match item {
-                Some(_) => { },
+                Some(_) => {},
                 None => return false,
             }
         }
         true
     }
 
-    #[allow(dead_code)]
     pub fn get_winning_color(&self, amount_to_win: usize) -> Option<Color> {
         let check_line = |line: &Line| -> Option<Color> {
             let mut current: Option<Color> = None;
@@ -152,7 +148,7 @@ impl Board {
         for line in lines.iter() {
             match check_line(line) {
                 Some(color) => return Some(color),
-                None => { },
+                None => {},
             }
         }
         None

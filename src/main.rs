@@ -9,8 +9,9 @@ fn main() {
         Err(_) => { },
     }
     let mut game = Game::new(Some(board));
-    loop {
-        game.take_turn();
+    match game.start() {
+        Ok(_) => {},
+        Err(_) => println!("[ERROR]"),
     }
     // println!("{:?}", game.board.get_winning_color(4));
 }
