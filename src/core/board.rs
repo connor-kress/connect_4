@@ -105,22 +105,20 @@ impl Board {
             let mut count = 0;
             for item in line {
                 let item_color;
-                match item {
-                    Some(color) => item_color = *color,
-                    None => {
-                        current = None;
-                        count = 0;
-                        continue;
-                    },
+                if let Some(color) = item {
+                    item_color = *color;
+                } else {
+                    current = None;
+                    count = 0;
+                    continue;
                 }
                 let current_color;
-                match current {
-                    Some(color) => current_color = color,
-                    None => {
-                        current = Some(item_color);
-                        count = 1;
-                        continue;
-                    },
+                if let Some(color) = current {
+                    current_color = color;
+                } else {
+                    current = Some(item_color);
+                    count = 1;
+                    continue;
                 }
                 if item_color == current_color {
                     if count == amount_to_win - 1 {

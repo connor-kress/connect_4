@@ -7,7 +7,7 @@ pub struct Game {
     amount_to_win: usize,
     started: bool,
     ended: bool,
-    // players: Vec<u8>,
+    // players: Vec<Player>,
 }
 
 impl Game {
@@ -57,12 +57,14 @@ impl Game {
 
     fn handle_win(&mut self, color: Color) {
         self.ended = true;
+        println!("{:?}", self.board);
         println!("{:?} wins!", color);
     }
 
     fn handle_tie(&mut self) {
         self.ended = true;
-        println!("Tie");
+        println!("{:?}", self.board);
+        println!("Tie.");
     }
 
     pub fn resume(&mut self) -> Result<(), ()> {
@@ -88,12 +90,12 @@ impl Game {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn start(&mut self) -> Result<(), ()> {
         if self.started | self.ended {
             return Err(());
         }
         self.started = true;
         self.resume()
-
     }
 }
