@@ -7,7 +7,7 @@ pub struct AIPlayer {
 
 impl AIPlayer {
     #[allow(dead_code)]
-    fn new(name: String) -> Self {
+    pub fn new(name: String) -> Self {
         AIPlayer {
             name,
         }
