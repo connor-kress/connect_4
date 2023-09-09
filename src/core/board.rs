@@ -4,9 +4,9 @@ type Line = Vec<Option<Color>>;
 
 #[derive(Debug, PartialEq)]
 pub struct Board {
-    data: Vec<Line>,
-    num_rows: usize,
-    num_columns: usize,
+    pub data: Vec<Line>,
+    pub num_rows: usize,
+    pub num_columns: usize,
 }
 
 impl Board {
