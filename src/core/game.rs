@@ -1,8 +1,8 @@
 use crate::core::{ Board, Color, Player };
 
-pub struct Game<'a, PlayerType: Player> {
+pub struct Game<PlayerType: Player> {
     board: Board,
-    players: Vec<&'a PlayerType>,
+    players: Vec<Box<PlayerType>>,
     player_colors: Vec<Color>,
     current_player_index: usize,
     amount_to_win: usize,
@@ -10,10 +10,10 @@ pub struct Game<'a, PlayerType: Player> {
     ended: bool,
 }
 
-impl<'a, PlayerType: Player> Game<'a, PlayerType> {
+impl<PlayerType: Player> Game<PlayerType> {
     #[allow(dead_code)]
     pub fn new(board: Option<Board>,
-               players: Vec<&'a PlayerType>,
+               players: Vec<Box<PlayerType>>,
                player_colors: Vec<Color>) -> Result<Self, String> {
         if players.len() != player_colors.len() {
             return Err(
@@ -36,8 +36,8 @@ impl<'a, PlayerType: Player> Game<'a, PlayerType> {
         })
     }
 
-    fn get_current_player(&self) -> &'a PlayerType {
-        self.players[self.current_player_index]
+    fn get_current_player(&self) -> &Box<PlayerType> {
+        &self.players[self.current_player_index]
     }
     
     fn get_current_color(&self) -> Color {

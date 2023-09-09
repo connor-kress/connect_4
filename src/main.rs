@@ -7,10 +7,11 @@ fn run_game() -> Result<(), String> {
         TerminalPlayer::new("Player 1".into()),
         TerminalPlayer::new("Player 2".into()),
     ];
-    let player_refs = players.iter().collect::<Vec<&TerminalPlayer>>();
+    let player_refs = players.into_iter().map(|x| Box::new(x)).collect::<Vec<Box<TerminalPlayer>>>();
     let player_colors = vec![Color::Red, Color::Black];
     let mut game = Game::new(None, player_refs, player_colors)?;
-    game.start()
+    game.start()?;
+    Ok(())
 }
 
 fn main() {
