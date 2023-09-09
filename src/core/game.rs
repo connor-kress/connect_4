@@ -1,86 +1,86 @@
-use crate::core::Board;
-use super::Color;
+use crate::core::{ Board, Color, Player };
 
-pub struct Game {
+pub struct Game<'a, PlayerType: Player> {
     board: Board,
-    current_color: Color,
+    players: Vec<&'a PlayerType>,
+    player_colors: Vec<Color>,
+    current_player_index: usize,
     amount_to_win: usize,
     started: bool,
     ended: bool,
-    // players: Vec<Player>,
 }
 
-impl Game {
+impl<'a, PlayerType: Player> Game<'a, PlayerType> {
     #[allow(dead_code)]
-    pub fn new(board: Option<Board>) -> Self {
-        Game {
+    pub fn new(board: Option<Board>,
+               players: Vec<&'a PlayerType>,
+               player_colors: Vec<Color>) -> Result<Self, String> {
+        if players.len() != player_colors.len() {
+            return Err(
+                "Player list and player color list's lengths do not match".to_string()
+            );
+        }
+        Ok(Game {
             board: {
                 match board {
                     Some(board) => board,
                     None => Board::new(6, 7),
                 }
             },
-            current_color: Color::Red,
+            players,
+            player_colors,
+            current_player_index: 0,
             amount_to_win: 4,
             started: false,
             ended: false,
-        }
+        })
+    }
+
+    fn get_current_player(&self) -> &'a PlayerType {
+        self.players[self.current_player_index]
+    }
+    
+    fn get_current_color(&self) -> Color {
+        self.player_colors[self.current_player_index]
     }
 
     fn switch_turn(&mut self) {
-        self.current_color = match self.current_color {
-            Color::Red => Color::Black,
-            Color::Black => Color::Red,
+        if self.current_player_index == self.players.len() - 1 {
+            self.current_player_index = 0;
+        } else {
+            self.current_player_index += 1;
         }
     }
 
-    fn take_turn(&mut self) {
-        loop {
-            let col_index;
-            loop {
-                let mut line = String::new();
-                println!("Pick a column ({:?}):", self.current_color);
-                let _ = std::io::stdin().read_line(&mut line);
-                match line.trim().parse() {
-                    Ok(int) => {
-                        col_index = int;
-                        break;
-                    },
-                    Err(_) => continue,
-                }
-            }
-            match self.board.drop_piece(self.current_color, col_index) {
-                Ok(_) => break,
-                Err(_) => continue,
-            }
-        }
+    fn take_turn(&mut self) -> Result<(), String> {
+        let color = self.get_current_color();
+        let col_index = self.get_current_player().get_column_index(&self.board, color)?;
+        self.board.drop_piece(color, col_index)
     }
 
     fn handle_win(&mut self, color: Color) {
         self.ended = true;
-        println!("{:?}", self.board);
+        self.board.print();
         println!("{:?} wins!", color);
     }
 
     fn handle_tie(&mut self) {
         self.ended = true;
-        println!("{:?}", self.board);
+        self.board.print();
         println!("Tie.");
     }
 
-    pub fn resume(&mut self) -> Result<(), ()> {
-        if self.ended | !self.started {
-            return Err(());
+    pub fn resume(&mut self) -> Result<(), String> {
+        if !self.started {
+            return Err("Attempted to resume an uninstantiated game.".to_string());
+        } else if self.ended {
+            return Err("Attempted to resume an ended game.".to_string());
         }
         loop {
-            println!("{:?}", self.board);
-            self.take_turn();
-            match self.board.get_winning_color(self.amount_to_win) {
-                Some(color) => {
-                    self.handle_win(color);
-                    break;
-                },
-                None => {},
+            self.take_turn()?;
+            if let Some(color) = self.board.get_winning_color(self.amount_to_win) {
+                self.handle_win(color);
+                break;
             }
             if self.board.is_full() {
                 self.handle_tie();
@@ -92,9 +92,11 @@ impl Game {
     }
 
     #[allow(dead_code)]
-    pub fn start(&mut self) -> Result<(), ()> {
-        if self.started | self.ended {
-            return Err(());
+    pub fn start(&mut self) -> Result<(), String> {
+        if self.started {
+            return Err("Attempted to start a instantiated game.".to_string());
+        } else if self.ended {
+            return Err("Attempted to start an ended game.".to_string());
         }
         self.started = true;
         self.resume()

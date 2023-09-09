@@ -27,7 +27,7 @@ impl Board {
         board
     }
 
-    fn available_column(&self, col_index: usize) -> bool {
+    pub fn available_column(&self, col_index: usize) -> bool {
         if col_index >= self.num_columns {
             return false
         }
@@ -48,13 +48,13 @@ impl Board {
         highest
     }
 
-    pub fn drop_piece(&mut self, color: Color, col_index: usize) -> Result<(), ()> {
+    pub fn drop_piece(&mut self, color: Color, col_index: usize) -> Result<(), String> {
         if self.available_column(col_index) {
             let row_index = self.get_highest_index(col_index);
             self.data[row_index][col_index] = Some(color);
             Ok(())
         } else {
-            Err(())
+            Err(format!("Column {} is not available.", col_index))
         }
     }
 
@@ -151,5 +151,14 @@ impl Board {
             }
         }
         None
+    }
+
+    pub fn stringify(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    #[allow(dead_code)]
+    pub fn print(&self) {
+        println!("{}", self.stringify());
     }
 }
