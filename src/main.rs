@@ -9,7 +9,7 @@ fn run_game() -> Result<(), String> {
         Box::new(AIPlayer::new("Player 3".into())),
     ];
     let player_colors = vec![Color::Red, Color::Black, Color::Red];
-
+    
     let mut game = Game::new(None, player_refs, player_colors)?;
     game.start()?;
     Ok(())
