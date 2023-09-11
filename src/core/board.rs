@@ -7,15 +7,24 @@ pub struct Board {
     pub data: Vec<Line>,
     pub num_rows: usize,
     pub num_columns: usize,
+    pub column_width: usize,
+    pub row_height: usize,
 }
 
 impl Board {
     #[allow(dead_code)]
-    pub fn new(num_rows: usize, num_columns: usize) -> Self {
+    pub fn new(
+        num_rows: usize,
+        num_columns: usize,
+        row_height: usize,
+        column_width: usize,
+    ) -> Self {
         let mut board = Board {
             data: Vec::new(),
             num_rows,
             num_columns,
+            row_height,
+            column_width,
         };
         for _ in 0..num_rows {
             let mut row = Vec::new();
@@ -153,12 +162,47 @@ impl Board {
         None
     }
 
-    pub fn stringify(&self) -> String {
-        format!("{:?}", self)
+    pub fn stringify(&self) -> Result<String, String> {
+        let get_str_of = |item: Option<Color>| -> Result<String, String> {
+            if let Some(color) = item {
+                let color_str = color.to_string();
+                if color_str.len() > self.column_width {
+                    return Err("Inadequate column width.".into());
+                }
+                let remaining = self.column_width - color_str.len();
+                let left = " ".repeat((remaining as f64 / 2.0).floor() as usize);
+                let right = " ".repeat((remaining as f64 / 2.0).ceil() as usize);
+                Ok(left + &color_str + &right)
+            } else {
+                Ok(" ".repeat(self.column_width))
+            }
+        };
+
+        let mut bstr = "-".repeat(self.num_columns * (self.column_width + 1) + 1).to_string() + "\n";
+        for row in self.data.iter() {
+            let mut item_strs = Vec::new();
+            for item in row {
+                item_strs.push(get_str_of(*item)?);
+            }
+            bstr = bstr + &(
+                ("|".to_string() + &(&(" ".repeat(self.column_width) + "|"))
+                    .repeat(self.num_columns) + "\n")
+                .repeat(((self.row_height - 1) as f64 / 2.0).floor() as usize)
+            );
+            bstr = bstr + &item_strs.iter().fold("|".to_string(), |acc, elem| acc + &elem + "|") + "\n";
+            bstr = bstr + &(
+                ("|".to_string() + &(&(" ".repeat(self.column_width) + "|"))
+                    .repeat(self.num_columns) + "\n")
+                .repeat(((self.row_height - 1) as f64 / 2.0).ceil() as usize)
+            );
+            bstr = bstr + &"-".repeat(self.num_columns * (self.column_width + 1) + 1).to_string() + "\n";
+        }
+        Ok(bstr.trim().into())
     }
 
     #[allow(dead_code)]
-    pub fn print(&self) {
-        println!("{}", self.stringify());
+    pub fn print(&self) -> Result<(), String> {
+        println!("{}", self.stringify()?);
+        Ok(())
     }
 }

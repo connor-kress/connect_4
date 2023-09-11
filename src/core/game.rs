@@ -1,4 +1,4 @@
-use crate::core::{ Board, Color, Player };
+use crate::core::{ Board, Color, Player, clear_screen };
 
 pub struct Game {
     board: Board,
@@ -24,7 +24,7 @@ impl Game {
             board: {
                 match board {
                     Some(board) => board,
-                    None => Board::new(6, 7),
+                    None => Board::new(6, 7, 3, 7),
                 }
             },
             players,
@@ -58,16 +58,20 @@ impl Game {
         self.board.drop_piece(color, col_index)
     }
 
-    fn handle_win(&mut self, color: Color) {
+    fn handle_win(&mut self, color: Color) -> Result<(), String> {
         self.ended = true;
-        self.board.print();
+        clear_screen();
+        self.board.print()?;
         println!("{:?} wins!", color);
+        Ok(())
     }
 
-    fn handle_tie(&mut self) {
+    fn handle_tie(&mut self) -> Result<(), String> {
         self.ended = true;
-        self.board.print();
+        clear_screen();
+        self.board.print()?;
         println!("Tie.");
+        Ok(())
     }
 
     pub fn resume(&mut self) -> Result<(), String> {
@@ -79,11 +83,11 @@ impl Game {
         loop {
             self.take_turn()?;
             if let Some(color) = self.board.get_winning_color(self.amount_to_win) {
-                self.handle_win(color);
+                self.handle_win(color)?;
                 break;
             }
             if self.board.is_full() {
-                self.handle_tie();
+                self.handle_tie()?;
                 break;
             }
             self.switch_turn();

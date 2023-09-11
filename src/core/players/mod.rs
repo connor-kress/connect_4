@@ -1,8 +1,8 @@
 mod player;
 pub use player::Player;
 
-mod ai_random;
-pub use ai_random::AIPlayer;
+mod ai_player;
+pub use ai_player::AIPlayer;
 
-mod terminal;
-pub use terminal::TerminalPlayer;
+mod terminal_player;
+pub use terminal_player::TerminalPlayer;
