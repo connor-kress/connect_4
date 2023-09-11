@@ -1,3 +1,4 @@
+
 use crate::core::{ Board, Color, Player, clear_screen };
 
 pub struct Game {
@@ -8,6 +9,7 @@ pub struct Game {
     amount_to_win: usize,
     started: bool,
     ended: bool,
+    winner_indices: Option<Vec<usize>>,
 }
 
 impl Game {
@@ -33,15 +35,29 @@ impl Game {
             amount_to_win: 4,
             started: false,
             ended: false,
+            winner_indices: None,
         })
     }
 
     fn get_current_player(&self) -> &Box<dyn Player> {
         &self.players[self.current_player_index]
     }
+
+    fn get_player(&self, index: usize) -> &Box<dyn Player> {
+        &self.players[index]
+    }
     
     fn get_current_color(&self) -> Color {
         self.player_colors[self.current_player_index]
+    }
+
+    fn get_player_indicies_with_color(&self, color: Color) -> Vec<usize> {
+        self.player_colors
+            .iter()
+            .enumerate()
+            .filter(|(_, player_color)| **player_color == color)
+            .map(|(i, _)| i)
+            .collect()
     }
 
     fn switch_turn(&mut self) {
@@ -62,7 +78,36 @@ impl Game {
         self.ended = true;
         clear_screen();
         self.board.print()?;
-        println!("{:?} wins!", color);
+        let winner_indices = self.get_player_indicies_with_color(color);
+        let num_winners = winner_indices.len();
+        let winners = winner_indices.iter().map(|i| self.get_player(*i)).collect::<Vec<&Box<dyn Player>>>();
+        let winners_str = {
+            if num_winners == 1 {
+                winners[0].get_name()
+            } else if num_winners == 2 {
+                winners[0].get_name() + " and " + &winners[1].get_name()
+            } else {
+                winners.iter()
+                    .map(|player| player.get_name())
+                    .enumerate()
+                    .fold(String::new(), |acc, (i, name)| {
+                            acc + if i == 0 {
+                                ""
+                            } else if i == num_winners - 1 {
+                                ", and "
+                            } else {
+                                ", "
+                            }
+                            + &name
+                    })
+            }
+        };
+        if num_winners == 1 {
+            println!("{} ({}) wins!", color, winners_str);
+        } else {
+            println!("{} team ({}) wins!", color, winners_str);
+        }
+        self.winner_indices = Some(winner_indices);
         Ok(())
     }
 

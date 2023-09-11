@@ -31,7 +31,7 @@ impl Player for TerminalPlayer {
                 println!("{}", msg);
             }
             let mut line = String::new();
-            println!("{} ({}):", color, self.name);
+            println!("{} ({}):", color, self.get_name());
             let _ = std::io::stdin().read_line(&mut line);
             if let Ok(int) = line.trim().parse::<usize>() {
                 col_index = int - 1;
@@ -48,5 +48,9 @@ impl Player for TerminalPlayer {
                 continue;
             }
         }
+    }
+
+    fn get_name(&self) -> String {
+        self.name.clone()
     }
 }
