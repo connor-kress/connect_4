@@ -1,4 +1,3 @@
-
 use crate::core::{ Board, Color, Player, clear_screen };
 
 pub struct Game {
@@ -46,7 +45,7 @@ impl Game {
     fn get_player(&self, index: usize) -> &Box<dyn Player> {
         &self.players[index]
     }
-    
+
     fn get_current_color(&self) -> Color {
         self.player_colors[self.current_player_index]
     }
