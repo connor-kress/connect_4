@@ -1,17 +1,54 @@
 use crate::core::{ Board, Color, Player, clear_screen };
 
+/// Represents a singular game with players and a board which can be played.
 pub struct Game {
+    /// The board that the game is player on.
     board: Board,
+    /// The players participating in the game.
     players: Vec<Box<dyn Player>>,
+    /// The color team that the players in the corresponding index are on.
     player_colors: Vec<Color>,
+    /// The index that describes who the game's current active player is.
     current_player_index: usize,
+    /// The number of pieces a team must get in a row to win the game (4 by default).
     amount_to_win: usize,
+    /// Whether or not the game has started.
     started: bool,
+    /// Whether or not the game has ended.
     ended: bool,
+    /// A list containing the indices of all players on the winning team of an ended game.
     winner_indices: Option<Vec<usize>>,
 }
 
 impl Game {
+    /// Creates a game instance which can be started to be played.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `board` - pass `Some(board)` to play with a custom sized or preinstantiated board
+    ///             or pass `None` for an automatic default sized board.
+    /// 
+    /// * `players` - a `Vec` of `Box<dyn Player>`s which will play in their present order
+    ///                in the list.
+    /// 
+    /// * `player_colors` - a `Vec` of `Color`s of the same length as `players` which denotes
+    ///                     the team of each player at the corresponding index in `players`.
+    /// 
+    /// Returns a `Result` type with a `Ok` containing the `Game` instance to indicate a success or
+    /// an `Err` with a `String` containing an error message if invalid inputs are passed.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// let players = vec![
+    ///     Box::new(TerminalPlayer::new("Player 1".into())),
+    ///     Box::new(TerminalPlayer::new("Player 2".into())),
+    /// ];
+    /// let player_colors = vec![Color::Red, Color::Black];
+    /// 
+    /// let mut game = Game::new(None, players, player_colors);
+    /// ...
+    /// ```
     #[allow(dead_code)]
     pub fn new(board: Option<Board>,
                players: Vec<Box<dyn Player>>,
@@ -38,19 +75,23 @@ impl Game {
         })
     }
 
+    /// Returns a reference to the current active player.
     fn get_current_player(&self) -> &Box<dyn Player> {
         &self.players[self.current_player_index]
     }
 
+    /// Returns a reference to the player at `index` in the game's queue.
     fn get_player(&self, index: usize) -> &Box<dyn Player> {
         &self.players[index]
     }
 
+    /// Returns the `Color` corresponding with the game's current active player.
     fn get_current_color(&self) -> Color {
         self.player_colors[self.current_player_index]
     }
 
-    fn get_player_indicies_with_color(&self, color: Color) -> Vec<usize> {
+    /// Returns the indices of all players in the game with the given `Color`.
+    fn get_player_indices_with_color(&self, color: Color) -> Vec<usize> {
         self.player_colors
             .iter()
             .enumerate()
@@ -59,6 +100,7 @@ impl Game {
             .collect()
     }
 
+    /// Increments the `current_player_index` which switches the game's active player.
     fn switch_turn(&mut self) {
         if self.current_player_index == self.players.len() - 1 {
             self.current_player_index = 0;
@@ -67,17 +109,28 @@ impl Game {
         }
     }
 
+    /// Prompts the active player for a column index and drops a piece corresponding with the
+    /// active player's `Color` in the `Board` at that column index.
+    /// 
+    /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
+    /// containing an error message.
     fn take_turn(&mut self) -> Result<(), String> {
         let color = self.get_current_color();
         let col_index = self.get_current_player().get_column_index(&self.board, color)?;
         self.board.drop_piece(color, col_index)
     }
 
+    /// Ends the game in a winning condition.
+    /// 
+    /// Is passed the winning `Color` to determine behavior.
+    /// 
+    /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
+    /// containing an error message.
     fn handle_win(&mut self, color: Color) -> Result<(), String> {
         self.ended = true;
         clear_screen();
         self.board.print()?;
-        let winner_indices = self.get_player_indicies_with_color(color);
+        let winner_indices = self.get_player_indices_with_color(color);
         let num_winners = winner_indices.len();
         let winners = winner_indices.iter().map(|i| self.get_player(*i)).collect::<Vec<&Box<dyn Player>>>();
         let winners_str = {
@@ -110,6 +163,10 @@ impl Game {
         Ok(())
     }
 
+    /// Ends the game in a tied condition (the board being full).
+    /// 
+    /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
+    /// containing an error message.
     fn handle_tie(&mut self) -> Result<(), String> {
         self.ended = true;
         clear_screen();
@@ -118,6 +175,12 @@ impl Game {
         Ok(())
     }
 
+    /// Starts a primary game loop from the current state of the `Game` instance.
+    /// 
+    /// This must be called on a game which is neither **unstarted** nor already **ended**.
+    /// 
+    /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
+    /// containing an error message.
     pub fn resume(&mut self) -> Result<(), String> {
         if !self.started {
             return Err("Attempted to resume an uninstantiated game.".to_string());
@@ -139,6 +202,23 @@ impl Game {
         Ok(())
     }
 
+    /// Begins the game and starts a primary game loop.
+    /// 
+    /// This must be called on a game which is neither already **started** nor already **ended**.
+    /// 
+    /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
+    /// containing an error message.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// let mut game = Game::new(None, players, player_colors);
+    /// 
+    /// match game.start() {
+    ///     Ok(_) => println!("Game ran successfully"),
+    ///     Err(msg) => println!("[ERROR] {}", msg),
+    /// }
+    /// ```
     #[allow(dead_code)]
     pub fn start(&mut self) -> Result<(), String> {
         if self.started {
