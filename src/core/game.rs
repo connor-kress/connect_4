@@ -216,7 +216,7 @@ impl Game {
     /// 
     /// match game.start() {
     ///     Ok(_) => println!("Game ran successfully"),
-    ///     Err(msg) => println!("[ERROR] {}", msg),
+    ///     Err(msg) => eprintln!("[ERROR] {}", msg),
     /// }
     /// ```
     #[allow(dead_code)]
