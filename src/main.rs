@@ -19,6 +19,6 @@ fn run_game() -> Result<(), String> {
 fn main() {
     match run_game() {
         Ok(_) => {},
-        Err(e) => println!("[ERROR] {}", e),
+        Err(msg) => println!("[ERROR] {}", msg),
     }
 }
