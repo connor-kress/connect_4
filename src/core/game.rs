@@ -2,7 +2,7 @@ use crate::core::{ Board, Color, Player, clear_screen };
 
 /// Represents a singular game with players and a board which can be played.
 pub struct Game {
-    /// The board that the game is player on.
+    /// The `Board` instance that the game is being played on.
     board: Board,
     /// The players participating in the game.
     players: Vec<Box<dyn Player>>,
