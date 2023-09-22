@@ -21,7 +21,7 @@ pub struct Game {
 }
 
 impl Game {
-    /// Creates a game instance which can be started to be played.
+    /// Constructs a game instance which can be started to be played.
     /// 
     /// # Arguments
     /// 
@@ -190,12 +190,10 @@ impl Game {
         loop {
             self.take_turn()?;
             if let Some(color) = self.board.get_winning_color(self.amount_to_win) {
-                self.handle_win(color)?;
-                break;
+                break self.handle_win(color)?;
             }
             if self.board.is_full() {
-                self.handle_tie()?;
-                break;
+                break self.handle_tie()?;
             }
             self.switch_turn();
         }
