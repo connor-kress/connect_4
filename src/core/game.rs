@@ -160,9 +160,9 @@ impl Game {
             }
         };
         if num_winners == 1 {
-            println!("{} ({}) wins!", color, winners_str);
+            println!("{color} ({winners_str}) wins!");
         } else {
-            println!("{} team ({}) wins!", color, winners_str);
+            println!("{color} team ({winners_str}) wins!");
         }
         self.winner_indices = Some(winner_indices);
         Ok(())
@@ -219,7 +219,7 @@ impl Game {
     ///
     /// match game.start() {
     ///     Ok(_) => println!("Game ran successfully"),
-    ///     Err(msg) => eprintln!("[ERROR] {}", msg),
+    ///     Err(msg) => eprintln!("[ERROR] {msg}"),
     /// }
     /// ```
     #[allow(dead_code)]

@@ -18,6 +18,6 @@ fn run_game() -> Result<(), String> {
 
 fn main() {
     if let Err(msg) = run_game() {
-        eprintln!("[ERROR] {}", msg);
+        eprintln!("[ERROR] {msg}");
     }
 }
