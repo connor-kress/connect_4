@@ -1,6 +1,6 @@
 mod core;
 #[allow(unused_imports)]
-use core::{ Color, Board, Game, Player, TerminalPlayer, AIPlayer };
+use core::{AIPlayer, Board, Color, Game, Player, TerminalPlayer};
 
 fn run_game() -> Result<(), String> {
     let players: Vec<Box<dyn Player>> = vec![
@@ -18,7 +18,7 @@ fn run_game() -> Result<(), String> {
 
 fn main() {
     match run_game() {
-        Ok(_) => {},
+        Ok(_) => {}
         Err(msg) => eprintln!("[ERROR] {}", msg),
     }
 }

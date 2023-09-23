@@ -1,4 +1,4 @@
-use crate::core::{ Player, Board, Color, clear_screen };
+use crate::core::{clear_screen, Board, Color, Player};
 
 #[allow(dead_code)]
 pub struct TerminalPlayer {
@@ -8,9 +8,7 @@ pub struct TerminalPlayer {
 impl TerminalPlayer {
     #[allow(dead_code)]
     pub fn new(name: String) -> Self {
-        TerminalPlayer {
-            name,
-        }
+        TerminalPlayer { name }
     }
 }
 
@@ -18,7 +16,8 @@ impl Player for TerminalPlayer {
     fn get_column_index(&self, board: &Board, color: Color) -> Result<usize, String> {
         let mut col_index;
         let mut error_msg: Option<String> = None;
-        let mut index_str = " ".repeat(1 + ((board.column_width as f64 - 1.0) / 2.0).floor() as usize);
+        let mut index_str =
+            " ".repeat(1 + ((board.column_width as f64 - 1.0) / 2.0).floor() as usize);
         let num_strs = (1..(board.num_columns + 1)).map(|num| num.to_string());
         for num_str in num_strs {
             index_str = index_str + &num_str + &" ".repeat(board.column_width + 1 - num_str.len());
@@ -42,9 +41,10 @@ impl Player for TerminalPlayer {
             if board.available_column(col_index) {
                 return Ok(col_index);
             } else {
-                error_msg = Some(
-                    format!("Please input a valid column index (1-{}).", board.num_columns)
-                );
+                error_msg = Some(format!(
+                    "Please input a valid column index (1-{}).",
+                    board.num_columns
+                ));
                 continue;
             }
         }

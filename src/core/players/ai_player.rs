@@ -1,5 +1,5 @@
+use crate::core::{Board, Color, Player};
 use rand::Rng;
-use crate::core::{ Player, Board, Color };
 
 #[allow(dead_code)]
 pub struct AIPlayer {
@@ -9,9 +9,7 @@ pub struct AIPlayer {
 impl AIPlayer {
     #[allow(dead_code)]
     pub fn new(name: String) -> Self {
-        AIPlayer {
-            name,
-        }
+        AIPlayer { name }
     }
 }
 

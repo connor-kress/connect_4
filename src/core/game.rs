@@ -1,4 +1,4 @@
-use crate::core::{ Board, Color, Player, clear_screen };
+use crate::core::{clear_screen, Board, Color, Player};
 
 /// Represents a singular game with players and a board which can be played.
 pub struct Game {
@@ -22,41 +22,41 @@ pub struct Game {
 
 impl Game {
     /// Constructs a game instance which can be started to be played.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `board` - pass `Some(board)` to play with a custom sized or preinstantiated board
     ///             or pass `None` for an automatic default sized board.
-    /// 
+    ///
     /// * `players` - a `Vec` of `Box<dyn Player>`s which will play in their present order
     ///                in the list.
-    /// 
+    ///
     /// * `player_colors` - a `Vec` of `Color`s of the same length as `players` which denotes
     ///                     the team of each player at the corresponding index in `players`.
-    /// 
+    ///
     /// Returns a `Result` type with a `Ok` containing the `Game` instance to indicate a success or
     /// an `Err` with a `String` containing an error message if invalid inputs are passed.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// let players = vec![
     ///     Box::new(TerminalPlayer::new("Player 1".into())),
     ///     Box::new(TerminalPlayer::new("Player 2".into())),
     /// ];
     /// let player_colors = vec![Color::Red, Color::Black];
-    /// 
+    ///
     /// let mut game = Game::new(None, players, player_colors);
     /// ...
     /// ```
     #[allow(dead_code)]
-    pub fn new(board: Option<Board>,
-               players: Vec<Box<dyn Player>>,
-               player_colors: Vec<Color>) -> Result<Self, String> {
+    pub fn new(
+        board: Option<Board>,
+        players: Vec<Box<dyn Player>>,
+        player_colors: Vec<Color>,
+    ) -> Result<Self, String> {
         if players.len() != player_colors.len() {
-            return Err(
-                "Player list and player color list's lengths do not match".to_string()
-            );
+            return Err("Player list and player color list's lengths do not match".to_string());
         }
         Ok(Game {
             board: {
@@ -76,13 +76,13 @@ impl Game {
     }
 
     /// Returns a reference to the current active player.
-    fn get_current_player(&self) -> &Box<dyn Player> {
-        &self.players[self.current_player_index]
+    fn get_current_player(&self) -> &dyn Player {
+        &*self.players[self.current_player_index]
     }
 
     /// Returns a reference to the player at `index` in the game's queue.
-    fn get_player(&self, index: usize) -> &Box<dyn Player> {
-        &self.players[index]
+    fn get_player(&self, index: usize) -> &dyn Player {
+        &*self.players[index]
     }
 
     /// Returns the `Color` corresponding with the game's current active player.
@@ -111,19 +111,21 @@ impl Game {
 
     /// Prompts the active player for a column index and drops a piece corresponding with the
     /// active player's `Color` in the `Board` at that column index.
-    /// 
+    ///
     /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
     /// containing an error message.
     fn take_turn(&mut self) -> Result<(), String> {
         let color = self.get_current_color();
-        let col_index = self.get_current_player().get_column_index(&self.board, color)?;
+        let col_index = self
+            .get_current_player()
+            .get_column_index(&self.board, color)?;
         self.board.drop_piece(color, col_index)
     }
 
     /// Ends the game in a winning condition.
-    /// 
+    ///
     /// Is passed the winning `Color` to determine behavior.
-    /// 
+    ///
     /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
     /// containing an error message.
     fn handle_win(&mut self, color: Color) -> Result<(), String> {
@@ -132,25 +134,28 @@ impl Game {
         self.board.print()?;
         let winner_indices = self.get_player_indices_with_color(color);
         let num_winners = winner_indices.len();
-        let winners = winner_indices.iter().map(|i| self.get_player(*i)).collect::<Vec<&Box<dyn Player>>>();
+        let winners = winner_indices
+            .iter()
+            .map(|i| self.get_player(*i))
+            .collect::<Vec<&dyn Player>>();
         let winners_str = {
             if num_winners == 1 {
                 winners[0].get_name()
             } else if num_winners == 2 {
                 winners[0].get_name() + " and " + &winners[1].get_name()
             } else {
-                winners.iter()
+                winners
+                    .iter()
                     .map(|player| player.get_name())
                     .enumerate()
                     .fold(String::new(), |acc, (i, name)| {
-                            acc + if i == 0 {
-                                ""
-                            } else if i == num_winners - 1 {
-                                ", and "
-                            } else {
-                                ", "
-                            }
-                            + &name
+                        acc + if i == 0 {
+                            ""
+                        } else if i == num_winners - 1 {
+                            ", and "
+                        } else {
+                            ", "
+                        } + &name
                     })
             }
         };
@@ -164,7 +169,7 @@ impl Game {
     }
 
     /// Ends the game in a tied condition (the board being full).
-    /// 
+    ///
     /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
     /// containing an error message.
     fn handle_tie(&mut self) -> Result<(), String> {
@@ -176,9 +181,9 @@ impl Game {
     }
 
     /// Starts a primary game loop from the current state of the `Game` instance.
-    /// 
+    ///
     /// This must be called on a game which is neither **unstarted** nor already **ended**.
-    /// 
+    ///
     /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
     /// containing an error message.
     pub fn resume(&mut self) -> Result<(), String> {
@@ -201,17 +206,17 @@ impl Game {
     }
 
     /// Begins the game and starts a primary game loop.
-    /// 
+    ///
     /// This must be called on a game which is neither already **started** nor already **ended**.
-    /// 
+    ///
     /// Returns a `Result` type with a unit `Ok` to indicate a success or an `Err` with a `String`
     /// containing an error message.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// let mut game = Game::new(None, players, player_colors);
-    /// 
+    ///
     /// match game.start() {
     ///     Ok(_) => println!("Game ran successfully"),
     ///     Err(msg) => eprintln!("[ERROR] {}", msg),
