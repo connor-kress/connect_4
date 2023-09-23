@@ -17,8 +17,7 @@ fn run_game() -> Result<(), String> {
 }
 
 fn main() {
-    match run_game() {
-        Ok(_) => {}
-        Err(msg) => eprintln!("[ERROR] {}", msg),
+    if let Err(msg) = run_game() {
+        eprintln!("[ERROR] {}", msg);
     }
 }
